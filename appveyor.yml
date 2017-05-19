@@ -1,6 +1,6 @@
 os: Visual Studio 2017
 
-version: "{appveyor_repo_tag_name}-{build}"
+version: 1.0.{build}
 
 configuration: Release
 
