@@ -5,8 +5,12 @@
     <Authors>Peter Riesz</Authors>
     <Company>Visual Eyes Creative</Company>
     <PackageId>Xero-NetStandard</PackageId>
-    <Description>Xero.Api for .Net Standard 1.4</Description>
+    <Description></Description>
     <Product>Xero.Api .Net Standard 1.4</Product>
+    <PackageProjectUrl>https://github.com/visualeyes/Xero-NetStandard</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/visualeyes/Xero-NetStandard</RepositoryUrl>
+    <PackageTags>xero;.NET Standard</PackageTags>
+    <PackageLicenseUrl>https://github.com/visualeyes/Xero-NetStandard/blob/master/LICENSE.md</PackageLicenseUrl>
   </PropertyGroup>
     
   <ItemGroup>
