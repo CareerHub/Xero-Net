@@ -1,6 +1,6 @@
 os: Visual Studio 2017
 
-version: 1.0.0-{build}
+version: {appveyor_repo_tag}-{build}
 
 configuration: Release
 
@@ -15,7 +15,7 @@ before_build:
   - dotnet restore "Xero.Api"
 
 build_script:
-  - ps: dotnet pack "Xero.Api" --configuration Release --output "bin" --version-suffix $env:APPVEYOR_BUILD_NUMBER
+  - ps: dotnet pack "Xero.Api" --configuration Release --output "bin" /p:PackageVersion=$env:APPVEYOR_REPO_TAG
 
 artifacts:
   - path: Xero.Api\bin\*.nupkg
