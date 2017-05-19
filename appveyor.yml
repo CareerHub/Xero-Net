@@ -11,9 +11,11 @@ assembly_info:
   assembly_file_version: "{version}"
   assembly_informational_version: "{version}"
 
+before_build:
+  - dotnet restore "Xero.Api"
+
 build_script:
-  - ps: dotnet restore "Xero.Api"
-  - ps: dotnet pack "Xero.Api" --configuration Release --output "bin" --version-suffix {build}
+  - dotnet pack "Xero.Api" --configuration Release --output "bin" --version-suffix {build}
 
 artifacts:
   - path: Xero.Api\bin\Xero.Api.*.nupkg

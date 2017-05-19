@@ -4,8 +4,9 @@
     <TargetFramework>netstandard1.4</TargetFramework>
     <Authors>Peter Riesz</Authors>
     <Company>Visual Eyes Creative</Company>
-    <PackageId>Xero.Api.Standard</PackageId>
+    <PackageId>Xero-NetStandard</PackageId>
     <Description>Xero.Api for .Net Standard 1.4</Description>
+    <Product>Xero.Api .Net Standard 1.4</Product>
   </PropertyGroup>
     
   <ItemGroup>
