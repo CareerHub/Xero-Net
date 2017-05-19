@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Net;
+using Xero.Api.Infrastructure.ThirdParty.Dust.Http;
 using Xero.Api.Infrastructure.ThirdParty.Dust.Lang;
 
 namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Parameters {
@@ -18,7 +20,7 @@ namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.
 		}
 
 		private string Escape(string what) {
-			return new ParameterEncoding().Escape(what);
+			return UrlEncoder.UrlEncode(what ?? string.Empty);
 		}
 
 		private IEnumerable<Parameter> Parameters {

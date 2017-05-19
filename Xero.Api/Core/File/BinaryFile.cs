@@ -3,42 +3,32 @@ using System.IO;
 using System.Runtime.Serialization;
 using Xero.Api.Common;
 
-namespace Xero.Api.Core.File
-{
+namespace Xero.Api.Core.File {
     [DataContract(Namespace = "")]
-    public class BinaryFile
-    {
+    public class BinaryFile {
         private MemoryStream ContentStream { get; set; }
 
-        public BinaryFile()
-        {
+        public BinaryFile() {
         }
 
-        public BinaryFile(FileInfo fileInfo)
-        {
-            if (fileInfo == null)
-            {
+        public BinaryFile(FileInfo fileInfo) {
+            if(fileInfo == null) {
                 throw new ArgumentNullException("fileInfo");
             }
-            if (!fileInfo.Exists)
-            {
+            if(!fileInfo.Exists) {
                 throw new FileNotFoundException("The file could not be found", fileInfo.FullName);
             }
 
-            using (FileStream fileStream = fileInfo.OpenRead())
-            {
+            using(FileStream fileStream = fileInfo.OpenRead()) {
                 CopyData(fileStream, fileInfo.Name, MimeTypes.GetMimeType(fileInfo), (int)fileInfo.Length);
             }
         }
 
-        public BinaryFile(Stream content, string filename, string contentType, int length)
-        {
-            if (content == null)
-            {
+        public BinaryFile(Stream content, string filename, string contentType, int length) {
+            if(content == null) {
                 throw new ArgumentNullException("content");
             }
-            if (string.IsNullOrEmpty(filename))
-            {
+            if(string.IsNullOrEmpty(filename)) {
                 throw new ArgumentNullException("filename");
             }
 
@@ -55,27 +45,22 @@ namespace Xero.Api.Core.File
         public int ContentLength { get; set; }
 
         [DataMember]
-        public byte[] Content
-        {
+        public byte[] Content {
             get { return ContentStream == null ? new byte[0] : ContentStream.ToArray(); }
         }
 
-        public void Save(string fileName)
-        {
-            if (System.IO.File.Exists(fileName))
-            {
+        public void Save(string fileName) {
+            if(System.IO.File.Exists(fileName)) {
                 System.IO.File.Delete(fileName);
             }
 
-            using (var file = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
-            {
+            using(var file = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write)) {
                 ContentStream.Seek(0, SeekOrigin.Begin);
                 file.Write(Content, 0, ContentLength);
             }
         }
 
-        private void CopyData(Stream content, string filename, string contentType, int length)
-        {
+        private void CopyData(Stream content, string filename, string contentType, int length) {
             FileName = filename;
             MimeType = contentType;
             ContentLength = length;

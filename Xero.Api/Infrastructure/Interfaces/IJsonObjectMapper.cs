@@ -1,8 +1,6 @@
-﻿namespace Xero.Api.Infrastructure.Interfaces
-{
-    public interface IJsonObjectMapper
-    {
+﻿namespace Xero.Api.Infrastructure.Interfaces {
+    public interface IJsonObjectMapper {
         T From<T>(string result);
-        string To<T>(T request);        
+        string To<T>(T request);
     }
 }

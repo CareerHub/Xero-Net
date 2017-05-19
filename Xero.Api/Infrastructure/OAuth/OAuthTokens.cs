@@ -1,31 +1,28 @@
 ﻿using System;
 using System.Net;
-using Xero.Api.Infrastructure.Http;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.WebUtilities;
+using Xero.Api.Common;
 using Xero.Api.Infrastructure.Interfaces;
-using HttpUtility = Xero.Api.Infrastructure.ThirdParty.HttpUtility.HttpUtility;
 
-namespace Xero.Api.Infrastructure.OAuth
-{
-    public class OAuthTokens
-    {
+namespace Xero.Api.Infrastructure.OAuth {
+    public class OAuthTokens {
         private readonly string _authorizeUri;
         private readonly string _tokenUri;
         private const string XeroRequestUri = "oauth/RequestToken";
         private const string XeroAccessTokenUri = "oauth/AccessToken";
         private const string XeroAuthorizeUri = "oauth/Authorize";
 
-        public OAuthTokens(string authorizeUri, string tokenUri)
-        {
+        public OAuthTokens(string authorizeUri, string tokenUri) {
             _authorizeUri = authorizeUri;
             _tokenUri = tokenUri;
         }
 
-        public string AuthorizeUri
-        {
-            get
-            {
-                var uri = new UriBuilder(_authorizeUri)
-                {
+        public string AuthorizeUri {
+            get {
+                var uri = new UriBuilder(_authorizeUri) {
                     Path = XeroAuthorizeUri
                 };
 
@@ -33,81 +30,69 @@ namespace Xero.Api.Infrastructure.OAuth
             }
         }
 
-        public string RequestUri
-        {
-            get
-            {
+        public string RequestUri {
+            get {
                 return XeroRequestUri;
             }
         }
 
-        public string AccessUri
-        {
-            get
-            {
+        public string AccessUri {
+            get {
                 return XeroAccessTokenUri;
             }
         }
 
-        public IToken GetRequestToken(IConsumer consumer, string header)
-        {
-            return GetToken(_tokenUri,  new Token { ConsumerKey = consumer.ConsumerKey, ConsumerSecret = consumer.ConsumerSecret }, XeroRequestUri, header);
+        public Task<IToken> GetRequestTokenAsync(IConsumer consumer, string header) {
+            return GetTokenAsync(_tokenUri, new Token { ConsumerKey = consumer.ConsumerKey, ConsumerSecret = consumer.ConsumerSecret }, XeroRequestUri, header);
         }
 
-        public IToken GetAccessToken(IToken token, string header)
-        {
-            return GetToken(_tokenUri, token, XeroAccessTokenUri, header);
+        public Task<IToken> GetAccessTokenAsync(IToken token, string header) {
+            return GetTokenAsync(_tokenUri, token, XeroAccessTokenUri, header);
         }
 
-        public IToken RenewAccessToken(IToken token, string header)
-        {
-            return GetToken(_tokenUri, token, XeroAccessTokenUri, header);
+        public Task<IToken> RenewAccessTokenAsync(IToken token, string header) {
+            return GetTokenAsync(_tokenUri, token, XeroAccessTokenUri, header);
         }
 
-        public IToken GetToken(string baseUri, IToken consumer, string endPoint, string header)
-        {
-            var req = new HttpClient(baseUri)
-            {
-                UserAgent = "Xero Api wrapper - " + consumer.ConsumerKey
-            };
-            
-            req.AddHeader("Authorization", header);
+        public async Task<IToken> GetTokenAsync(string baseUri, IToken consumer, string endPoint, string header) {
+            using(var client = new HttpClient()) {
+                client.BaseAddress = new Uri(baseUri);
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Xero Api wrapper - " + consumer.ConsumerKey));
+                client.DefaultRequestHeaders.Add("Authorization", header);
 
-            var response = req.Post(endPoint, string.Empty);
+                var content = new StringContent(string.Empty);
+                var response = await client.PostAsync(endPoint, content);
+                var body = await response.Content.ReadAsStringAsync();
 
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                if (response.Body.Contains("oauth_problem"))
-                {
-                    throw new OAuthException(response.Body);
+                if(response.StatusCode != HttpStatusCode.OK) {
+                    if(body.Contains("oauth_problem")) {
+                        throw new OAuthException(body);
+                    }
+
+                    throw new UnexpectedOauthResponseException(response.StatusCode, body);
                 }
 
-                throw new UnexpectedOauthResponseException(response.StatusCode, response.Body);
+                var qs = QueryHelpers.ParseQuery(body);
+                var expires = qs.Get("oauth_expires_in");
+                var session = qs.Get("oauth_session_handle");
+
+                var token = new Token(consumer.ConsumerKey, consumer.ConsumerSecret) {
+                    TokenKey = qs.Get("oauth_token"),
+                    TokenSecret = qs.Get("oauth_token_secret"),
+                    OrganisationId = qs.Get("xero_org_muid")
+                };
+
+                if(!string.IsNullOrWhiteSpace(expires)) {
+                    token.ExpiresAt = DateTime.UtcNow.AddSeconds(int.Parse(expires));
+                }
+
+                if(!string.IsNullOrWhiteSpace(session)) {
+                    token.Session = session;
+                    token.SessionExpiresAt = DateTime.UtcNow.AddSeconds(int.Parse(qs.Get("oauth_authorization_expires_in")));
+                }
+
+                return token;
             }
-
-            var qs = HttpUtility.ParseQueryString(response.Body);
-            var expires = qs["oauth_expires_in"];
-            var session = qs["oauth_session_handle"];
-
-            var token = new Token(consumer.ConsumerKey, consumer.ConsumerSecret)
-            {
-                TokenKey = qs["oauth_token"],
-                TokenSecret = qs["oauth_token_secret"],
-                OrganisationId = qs["xero_org_muid"]
-            };
-
-            if (!string.IsNullOrWhiteSpace(expires))
-            {
-                token.ExpiresAt = DateTime.UtcNow.AddSeconds(int.Parse(expires));
-            }
-
-            if (!string.IsNullOrWhiteSpace(session))
-            {
-                token.Session = session;
-                token.SessionExpiresAt = DateTime.UtcNow.AddSeconds(int.Parse(qs["oauth_authorization_expires_in"]));
-            }
-
-            return token;
         }
     }
 }

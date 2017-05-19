@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
+using System.Threading.Tasks;
 
-namespace Xero.Api.Infrastructure.RateLimiter
-{
-    public class RateLimiter : IRateLimiter
-    {
+namespace Xero.Api.Infrastructure.RateLimiter {
+    public class RateLimiter : IRateLimiter {
         private readonly TimeSpan _duration;
         private readonly int _qty;
         private readonly Queue<DateTime> rateLimiter;
@@ -17,8 +15,7 @@ namespace Xero.Api.Infrastructure.RateLimiter
         /// </summary>
         /// <param name="duration"></param>
         /// <param name="qty"></param>
-        public RateLimiter(TimeSpan duration, int qty)
-        {
+        public RateLimiter(TimeSpan duration, int qty) {
             this._duration = duration;
             this._qty = qty;
             this.rateLimiter = new Queue<DateTime>(qty);
@@ -29,13 +26,12 @@ namespace Xero.Api.Infrastructure.RateLimiter
         /// <summary>
         /// Don't return from this method until we're back under the limit
         /// </summary>
-        public void WaitUntilLimit()
-        {
-            while (rateLimiter.Count >= _qty)
-            {
+        public async Task WaitUntilLimit() {
+            while(rateLimiter.Count >= _qty) {
                 var diff = rateLimiter.Peek().Add(_duration) - DateTime.UtcNow;
-                if (diff.TotalMilliseconds > 0)
-                    Thread.Sleep((int)diff.TotalMilliseconds + 1000);
+                if(diff.TotalMilliseconds > 0) {
+                    await Task.Delay(_duration);
+                }
                 rateLimiter.Dequeue();
             }
             rateLimiter.Enqueue(DateTime.UtcNow);
@@ -45,8 +41,7 @@ namespace Xero.Api.Infrastructure.RateLimiter
         /// Check whether we've used up all of the allocation
         /// </summary>
         /// <returns>True if we're over the limit, false if we've got some allocation left</returns>
-        public bool CheckLimit()
-        {
+        public bool CheckLimit() {
             return (rateLimiter.Count >= _qty && rateLimiter.Peek().Add(_duration) > DateTime.UtcNow);
         }
     }

@@ -1,37 +1,27 @@
-﻿using Xero.Api.Infrastructure.Http;
+﻿using System.Net.Http.Headers;
+using Xero.Api.Infrastructure.Http;
 using Xero.Api.Infrastructure.Interfaces;
 using Xero.Api.Infrastructure.RateLimiter;
 
-namespace Xero.Api.Common
-{
+namespace Xero.Api.Common {
     // It is used to plug together the the components which are used for authentication and serialization.
-    public abstract class XeroApi
-    {
-        public string BaseUri { get; protected set; }
+    public abstract class XeroApi {
+        protected XeroHttpClient Client { get; }
 
-        protected XeroHttpClient Client { get; private set; }
+        public string BaseUri { get; }
 
-        private XeroApi(string baseUri)
-        {
+        public ProductInfoHeaderValue UserAgent {
+            get { return Client.UserAgent; }
+            set { Client.UserAgent = value; }
+        }
+
+        private XeroApi(string baseUri) {
             BaseUri = baseUri;
         }
 
         protected XeroApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper, IRateLimiter rateLimiter)
-            : this(baseUri)
-        {
+            : this(baseUri) {
             Client = new XeroHttpClient(baseUri, auth, consumer, user, readMapper, writeMapper, rateLimiter);
         }
-
-        public string UserAgent
-        {
-            get
-            {
-                return Client.UserAgent;
-            }
-            set
-            {
-                Client.UserAgent = value;
-            }
-        }        
     }
 }

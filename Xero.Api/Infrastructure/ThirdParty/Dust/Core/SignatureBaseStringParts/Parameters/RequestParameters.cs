@@ -1,54 +1,55 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
-using HttpUtility = Xero.Api.Infrastructure.ThirdParty.HttpUtility.HttpUtility;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
-namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Parameters
-{
-    internal class RequestParameters : IEnumerable<Parameter>
-    {
-        private readonly NameValueCollection _values;
-    	private readonly Parameters _parameters;
+namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Parameters {
+    internal class RequestParameters : IEnumerable<Parameter> {
+        private readonly Dictionary<string, StringValues> _values;
+        private readonly Parameters _parameters;
 
-    	public RequestParameters(Request request)
-        {
-            _values = HttpUtility.HttpUtility.ParseQueryString(request.Url.Query);
-
-        	_parameters = new Parameters(MapAll());
+        public RequestParameters(Request request) {
+            _values = QueryHelpers.ParseQuery(request.Url.Query);
+            _parameters = new Parameters(MapAll());
         }
 
-    	private Parameter[] MapAll() {
-    		return _values.AllKeys.SelectMany(Map).ToArray();
-    	}
-
-    	private IEnumerable<Parameter> Map(string key)
-        {
-    		return ValuesFor(key).Select(v => new Parameter(key, v));
+        private Parameter[] MapAll() {
+            return _values.Keys.SelectMany(Map).ToArray();
         }
 
-    	private string[] ValuesFor(string key) {
-    		return _values.GetValues(key);
-    	}
+        private IEnumerable<Parameter> Map(string key) {
+            return ValuesFor(key).Select(v => new Parameter(key, v));
+        }
 
-    	#region Implementation of IEnumerable
+        private string[] ValuesFor(string key) {
+            StringValues result;
 
-    	IEnumerator IEnumerable.GetEnumerator() {
-    		return GetEnumerator();
-    	}
+            if(_values.TryGetValue(key, out result)) {
+                return result.ToArray();
+            }
 
-    	public IEnumerator<Parameter> GetEnumerator() {
-    		return _parameters.GetEnumerator();
-    	}
+            return new string[0];
+        }
 
-    	#endregion
+        #region Implementation of IEnumerable
 
-    	internal void Add(Parameters what) {
-    		_parameters.Add(what);
-    	}
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
+        }
 
-		public override string ToString() {
-			return _parameters.ToString();
-		}
+        public IEnumerator<Parameter> GetEnumerator() {
+            return _parameters.GetEnumerator();
+        }
+
+        #endregion
+
+        internal void Add(Parameters what) {
+            _parameters.Add(what);
+        }
+
+        public override string ToString() {
+            return _parameters.ToString();
+        }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Linq;
-using System.Linq;
 using System.Runtime.Serialization;
 using Xero.Api.Infrastructure.Interfaces;
 
-namespace Xero.Api.Common
-{
+namespace Xero.Api.Common {
     public abstract class XeroResponse<T> : XeroResponse, IXeroResponse<T>
     {
         public abstract IList<T> Values { get; }        

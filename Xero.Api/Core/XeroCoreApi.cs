@@ -1,63 +1,46 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xero.Api.Common;
 using Xero.Api.Core.Endpoints;
 using Xero.Api.Core.Model;
-using Xero.Api.Core.Model.Setup;
-using Xero.Api.Core.Response;
 using Xero.Api.Infrastructure.Interfaces;
 using Xero.Api.Infrastructure.RateLimiter;
 using Xero.Api.Serialization;
-using Organisation = Xero.Api.Core.Model.Organisation;
 
-namespace Xero.Api.Core
-{
-    public class XeroCoreApi : XeroApi, IXeroCoreApi
-    {
+namespace Xero.Api.Core {
+    public class XeroCoreApi : XeroApi, IXeroCoreApi {
         private IOrganisationEndpoint OrganisationEndpoint { get; set; }
 
         public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user,
             IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper)
-            : this(baseUri, auth, consumer, user, readMapper, writeMapper, null)
-        {
+            : this(baseUri, auth, consumer, user, readMapper, writeMapper, null) {
         }
 
         public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper, IRateLimiter rateLimiter)
-            : base(baseUri, auth, consumer, user, readMapper, writeMapper, rateLimiter)
-        {
+            : base(baseUri, auth, consumer, user, readMapper, writeMapper, rateLimiter) {
             Connect();
         }
-        
+
         public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user)
-            : this(baseUri, auth, consumer, user, null)
-        {
+            : this(baseUri, auth, consumer, user, null) {
         }
 
         public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IRateLimiter rateLimiter)
-            : this(baseUri, auth, consumer, user, new DefaultMapper(), new DefaultMapper(), rateLimiter)
-        {
+            : this(baseUri, auth, consumer, user, new DefaultMapper(), new DefaultMapper(), rateLimiter) {
         }
 
         public IAccountsEndpoint Accounts { get; private set; }
-        public AllocationsEndpoint Allocations { get; private set; }
-        public AttachmentsEndpoint Attachments { get; private set; }
         public IBankTransactionsEndpoint BankTransactions { get; private set; }
         public IBankTransfersEndpoint BankTransfers { get; private set; }
         public IBrandingThemesEndpoint BrandingThemes { get; private set; }
         public IContactsEndpoint Contacts { get; private set; }
-        public IContactGroupsEndpoint ContactGroups { get; private set;}
         public ICreditNotesEndpoint CreditNotes { get; private set; }
         public ICurrenciesEndpoint Currencies { get; set; }
         public IEmployeesEndpoint Employees { get; private set; }
         public IExpenseClaimsEndpoint ExpenseClaims { get; private set; }
-        public IFilesEndpoint Files { get; private set; }
-        public IFoldersEndpoint Folders { get; private set; }
-        public IInboxEndpoint Inbox { get; private set; }
-        public IAssociationsEndpoint Associations { get; private set; }
         public IInvoicesEndpoint Invoices { get; private set; }
-        public IItemsEndpoint Items { get; private set; }
         public IJournalsEndpoint Journals { get; protected set; }
-        public ILinkedTransactionsEndpoint LinkedTransactions { get; private set; }
         public IManualJournalsEndpoint ManualJournals { get; private set; }
         public IOverpaymentsEndpoint Overpayments { get; private set; }
         public IPaymentsEndpoint Payments { get; private set; }
@@ -66,37 +49,24 @@ namespace Xero.Api.Core
         public IPurchaseOrdersEndpoint PurchaseOrders { get; private set; }
         public IReceiptsEndpoint Receipts { get; private set; }
         public IRepeatingInvoicesEndpoint RepeatingInvoices { get; private set; }
-        public IReportsEndpoint Reports { get; private set; }
-        public ISetupEndpoint Setup { get; private set; }
         public ITaxRatesEndpoint TaxRates { get; private set; }
-        public ITrackingCategoriesEndpoint TrackingCategories { get; private set; }
         public IUsersEndpoint Users { get; private set; }
 
 
-        private void Connect()
-        {
+        private void Connect() {
             OrganisationEndpoint = new OrganisationEndpoint(Client);
 
             Accounts = new AccountsEndpoint(Client);
-            Allocations = new AllocationsEndpoint(Client);
-            Attachments = new AttachmentsEndpoint(Client);
             BankTransactions = new BankTransactionsEndpoint(Client);
             BankTransfers = new BankTransfersEndpoint(Client);
             BrandingThemes = new BrandingThemesEndpoint(Client);
             Contacts = new ContactsEndpoint(Client);
-            ContactGroups = new ContactGroupsEndpoint(Client);
             CreditNotes = new CreditNotesEndpoint(Client);
             Currencies = new CurrenciesEndpoint(Client);
             Employees = new EmployeesEndpoint(Client);
             ExpenseClaims = new ExpenseClaimsEndpoint(Client);
-            Files = new FilesEndpoint(Client);
-            Folders = new FoldersEndpoint(Client);
-            Inbox = new InboxEndpoint(Client);
-            Associations = new AssociationsEndpoint(Client);
             Invoices = new InvoicesEndpoint(Client);
-            Items = new ItemsEndpoint(Client);
             Journals = new JournalsEndpoint(Client);
-            LinkedTransactions = new LinkedTransactionsEndpoint(Client);
             ManualJournals = new ManualJournalsEndpoint(Client);
             Overpayments = new OverpaymentsEndpoint(Client);
             Payments = new PaymentsEndpoint(Client);
@@ -105,455 +75,280 @@ namespace Xero.Api.Core
             PurchaseOrders = new PurchaseOrdersEndpoint(Client);
             Receipts = new ReceiptsEndpoint(Client);
             RepeatingInvoices = new RepeatingInvoicesEndpoint(Client);
-            Reports = new ReportsEndpoint(Client);
-            Setup = new SetupEndpoint(Client);
             TaxRates = new TaxRatesEndpoint(Client);
-            TrackingCategories = new TrackingCategoriesEndpoint(Client);
             Users = new UsersEndpoint(Client);
         }
 
-        public Organisation Organisation
-        {
-            get
-            {
-                return OrganisationEndpoint.Find().FirstOrDefault();
-            }
+        public async Task<Organisation> GetOrganisationAsync() {
+            return (await OrganisationEndpoint.FindAsync()).FirstOrDefault();
         }
 
         #region Accounts
 
-        public IEnumerable<Account> Create(IEnumerable<Account> items)
-        {
-            return Accounts.Create(items);
+        public Task<IEnumerable<Account>> CreateAsync(IEnumerable<Account> items) {
+            return Accounts.CreateAsync(items);
         }
 
-        public IEnumerable<Account> Update(IEnumerable<Account> items)
-        {
-            return Accounts.Update(items);
+        public Task<IEnumerable<Account>> UpdateAsync(IEnumerable<Account> items) {
+            return Accounts.UpdateAsync(items);
         }
 
-        public Account Create(Account item)
-        {
-            return Accounts.Create(item);
+        public Task<Account> CreateAsync(Account item) {
+            return Accounts.CreateAsync(item);
         }
 
-        public Account Update(Account item)
-        {
-            return Accounts.Update(item);
+        public Task<Account> UpdateAsync(Account item) {
+            return Accounts.UpdateAsync(item);
         }
 
         #endregion
 
         #region BankTransactions
 
-        public IEnumerable<BankTransaction> Create(IEnumerable<BankTransaction> items)
-        {
-            return BankTransactions.Create(items);
+        public Task<IEnumerable<BankTransaction>> CreateAsync(IEnumerable<BankTransaction> items) {
+            return BankTransactions.CreateAsync(items);
         }
 
-        public IEnumerable<BankTransaction> Update(IEnumerable<BankTransaction> items)
-        {
-            return BankTransactions.Update(items);
+        public Task<IEnumerable<BankTransaction>> UpdateAsync(IEnumerable<BankTransaction> items) {
+            return BankTransactions.UpdateAsync(items);
         }
 
-        public BankTransaction Create(BankTransaction item)
-        {
-            return BankTransactions.Create(item);
+        public Task<BankTransaction> CreateAsync(BankTransaction item) {
+            return BankTransactions.CreateAsync(item);
         }
 
-        public BankTransaction Update(BankTransaction item)
-        {
-            return BankTransactions.Update(item);
+        public Task<BankTransaction> UpdateAsync(BankTransaction item) {
+            return BankTransactions.UpdateAsync(item);
         }
 
         #endregion
 
         #region BankTransfers
 
-        public IEnumerable<BankTransfer> Create(IEnumerable<BankTransfer> items)
-        {
-            return BankTransfers.Create(items);
+        public Task<IEnumerable<BankTransfer>> CreateAsync(IEnumerable<BankTransfer> items) {
+            return BankTransfers.CreateAsync(items);
         }
 
-        public BankTransfer Create(BankTransfer item)
-        {
-            return BankTransfers.Create(item);
+        public Task<BankTransfer> CreateAsync(BankTransfer item) {
+            return BankTransfers.CreateAsync(item);
         }
 
         #endregion
 
         #region Contacts
 
-        public IEnumerable<Contact> Create(IEnumerable<Contact> items)
-        {
-            return Contacts.Create(items);
+        public Task<IEnumerable<Contact>> CreateAsync(IEnumerable<Contact> items) {
+            return Contacts.CreateAsync(items);
         }
 
-        public IEnumerable<Contact> Update(IEnumerable<Contact> items)
-        {
-            return Contacts.Update(items);
+        public Task<IEnumerable<Contact>> UpdateAsync(IEnumerable<Contact> items) {
+            return Contacts.UpdateAsync(items);
         }
 
-        public Contact Create(Contact item)
-        {
-            return Contacts.Create(item);
+        public Task<Contact> CreateAsync(Contact item) {
+            return Contacts.CreateAsync(item);
         }
 
-        public Contact Update(Contact item)
-        {
-            return Contacts.Update(item);
-        }
-
-        #endregion
-        
-        #region ContactGroups
-
-        public IEnumerable<ContactGroup> Create(IEnumerable<ContactGroup> items)
-        {
-            return ContactGroups.Create(items);
-        }
-
-        public IEnumerable<ContactGroup> Update(IEnumerable<ContactGroup> items)
-        {
-            return ContactGroups.Update(items);
-        }
-
-        public ContactGroup Create(ContactGroup item)
-        {
-            return ContactGroups.Create(item);
-        }
-
-        public ContactGroup Update(ContactGroup item)
-        {
-            return ContactGroups.Update(item);
+        public Task<Contact> UpdateAsync(Contact item) {
+            return Contacts.UpdateAsync(item);
         }
 
         #endregion
 
         #region CreditNotes
 
-        public IEnumerable<CreditNote> Create(IEnumerable<CreditNote> items)
-        {
-            return CreditNotes.Create(items);
+        public Task<IEnumerable<CreditNote>> CreateAsync(IEnumerable<CreditNote> items) {
+            return CreditNotes.CreateAsync(items);
         }
 
-        public IEnumerable<CreditNote> Update(IEnumerable<CreditNote> items)
-        {
-            return CreditNotes.Update(items);
+        public Task<IEnumerable<CreditNote>> UpdateAsync(IEnumerable<CreditNote> items) {
+            return CreditNotes.UpdateAsync(items);
         }
 
-        public CreditNote Create(CreditNote item)
-        {
-            return CreditNotes.Create(item);
+        public Task<CreditNote> CreateAsync(CreditNote item) {
+            return CreditNotes.CreateAsync(item);
         }
 
-        public CreditNote Update(CreditNote item)
-        {
-            return CreditNotes.Update(item);
+        public Task<CreditNote> UpdateAsync(CreditNote item) {
+            return CreditNotes.UpdateAsync(item);
         }
 
         #endregion
 
         #region Employees
 
-        public IEnumerable<Employee> Create(IEnumerable<Employee> items)
-        {
-            return Employees.Create(items);
+        public Task<IEnumerable<Employee>> CreateAsync(IEnumerable<Employee> items) {
+            return Employees.CreateAsync(items);
         }
 
-        public IEnumerable<Employee> Update(IEnumerable<Employee> items)
-        {
-            return Employees.Update(items);
+        public Task<IEnumerable<Employee>> UpdateAsync(IEnumerable<Employee> items) {
+            return Employees.UpdateAsync(items);
         }
 
-        public Employee Create(Employee item)
-        {
-            return Employees.Create(item);
+        public Task<Employee> CreateAsync(Employee item) {
+            return Employees.CreateAsync(item);
         }
 
-        public Employee Update(Employee item)
-        {
-            return Employees.Update(item);
+        public Task<Employee> UpdateAsync(Employee item) {
+            return Employees.UpdateAsync(item);
         }
 
         #endregion
 
         #region ExpenseClaims
 
-        public IEnumerable<ExpenseClaim> Create(IEnumerable<ExpenseClaim> items)
-        {
-            return ExpenseClaims.Create(items);
+        public Task<IEnumerable<ExpenseClaim>> CreateAsync(IEnumerable<ExpenseClaim> items) {
+            return ExpenseClaims.CreateAsync(items);
         }
 
-        public IEnumerable<ExpenseClaim> Update(IEnumerable<ExpenseClaim> items)
-        {
-            return ExpenseClaims.Update(items);
+        public Task<IEnumerable<ExpenseClaim>> UpdateAsync(IEnumerable<ExpenseClaim> items) {
+            return ExpenseClaims.UpdateAsync(items);
         }
 
-        public ExpenseClaim Create(ExpenseClaim item)
-        {
-            return ExpenseClaims.Create(item);
+        public Task<ExpenseClaim> CreateAsync(ExpenseClaim item) {
+            return ExpenseClaims.CreateAsync(item);
         }
 
-        public ExpenseClaim Update(ExpenseClaim item)
-        {
-            return ExpenseClaims.Update(item);
+        public Task<ExpenseClaim> UpdateAsync(ExpenseClaim item) {
+            return ExpenseClaims.UpdateAsync(item);
         }
 
         #endregion
 
         #region Invoices
 
-        public IEnumerable<Invoice> Create(IEnumerable<Invoice> items)
-        {
-            return Invoices.Create(items);
+        public Task<IEnumerable<Invoice>> CreateAsync(IEnumerable<Invoice> items) {
+            return Invoices.CreateAsync(items);
         }
 
-        public IEnumerable<Invoice> Update(IEnumerable<Invoice> items)
-        {
-            return Invoices.Update(items);
+        public Task<IEnumerable<Invoice>> UpdateAsync(IEnumerable<Invoice> items) {
+            return Invoices.UpdateAsync(items);
         }
 
-        public Invoice Create(Invoice item)
-        {
-            return Invoices.Create(item);
+        public Task<Invoice> CreateAsync(Invoice item) {
+            return Invoices.CreateAsync(item);
         }
 
-        public Invoice Update(Invoice item)
-        {
-            return Invoices.Update(item);
-        }
-
-        #endregion
-
-        #region Items
-
-        public IEnumerable<Item> Create(IEnumerable<Item> items)
-        {
-            return Items.Create(items);
-        }
-
-        public IEnumerable<Item> Update(IEnumerable<Item> items)
-        {
-            return Items.Update(items);
-        }
-
-        public Item Create(Item item)
-        {
-            return Items.Create(item);
-        }
-
-        public Item Update(Item item)
-        {
-            return Items.Update(item);
-        }
-
-        #endregion
-
-        #region LinkedTransactions
-
-        public IEnumerable<LinkedTransaction> Create(IEnumerable<LinkedTransaction> items)
-        {
-            return LinkedTransactions.Create(items);
-        }
-
-        public IEnumerable<LinkedTransaction> Update(IEnumerable<LinkedTransaction> items)
-        {
-            return LinkedTransactions.Update(items);
-        }
-
-        public LinkedTransaction Create(LinkedTransaction item)
-        {
-            return LinkedTransactions.Create(item);
-        }
-
-        public LinkedTransaction Update(LinkedTransaction item)
-        {
-            return LinkedTransactions.Update(item);
+        public Task<Invoice> UpdateAsync(Invoice item) {
+            return Invoices.UpdateAsync(item);
         }
 
         #endregion
 
         #region ManualJournals
 
-        public IEnumerable<ManualJournal> Create(IEnumerable<ManualJournal> items)
-        {
-            return ManualJournals.Create(items);
+        public Task<IEnumerable<ManualJournal>> CreateAsync(IEnumerable<ManualJournal> items) {
+            return ManualJournals.CreateAsync(items);
         }
 
-        public IEnumerable<ManualJournal> Update(IEnumerable<ManualJournal> items)
-        {
-            return ManualJournals.Update(items);
+        public Task<IEnumerable<ManualJournal>> UpdateAsync(IEnumerable<ManualJournal> items) {
+            return ManualJournals.UpdateAsync(items);
         }
 
-        public ManualJournal Create(ManualJournal item)
-        {
-            return ManualJournals.Create(item);
+        public Task<ManualJournal> CreateAsync(ManualJournal item) {
+            return ManualJournals.CreateAsync(item);
         }
 
-        public ManualJournal Update(ManualJournal item)
-        {
-            return ManualJournals.Update(item);
+        public Task<ManualJournal> UpdateAsync(ManualJournal item) {
+            return ManualJournals.UpdateAsync(item);
         }
 
         #endregion
 
         #region Payments
 
-        public IEnumerable<Payment> Create(IEnumerable<Payment> items)
-        {
-            return Payments.Create(items);
+        public Task<IEnumerable<Payment>> CreateAsync(IEnumerable<Payment> items) {
+            return Payments.CreateAsync(items);
         }
 
-        public IEnumerable<Payment> Update(IEnumerable<Payment> items)
-        {
-            return Payments.Update(items);
+        public Task<IEnumerable<Payment>> UpdateAsync(IEnumerable<Payment> items) {
+            return Payments.UpdateAsync(items);
         }
 
-        public Payment Create(Payment item)
-        {
-            return Payments.Create(item);
+        public Task<Payment> CreateAsync(Payment item) {
+            return Payments.CreateAsync(item);
         }
 
-        public Payment Update(Payment item)
-        {
-            return Payments.Update(item);
+        public Task<Payment> UpdateAsync(Payment item) {
+            return Payments.UpdateAsync(item);
         }
 
         #endregion
 
         #region PurchaseOrders
 
-        public IEnumerable<PurchaseOrder> Create(IEnumerable<PurchaseOrder> items)
-        {
-            return PurchaseOrders.Create(items);
+        public Task<IEnumerable<PurchaseOrder>> CreateAsync(IEnumerable<PurchaseOrder> items) {
+            return PurchaseOrders.CreateAsync(items);
         }
 
-        public IEnumerable<PurchaseOrder> Update(IEnumerable<PurchaseOrder> items)
-        {
-            return PurchaseOrders.Update(items);
+        public Task<IEnumerable<PurchaseOrder>> UpdateAsync(IEnumerable<PurchaseOrder> items) {
+            return PurchaseOrders.UpdateAsync(items);
         }
 
-        public PurchaseOrder Create(PurchaseOrder item)
-        {
-            return PurchaseOrders.Create(item);
+        public Task<PurchaseOrder> CreateAsync(PurchaseOrder item) {
+            return PurchaseOrders.CreateAsync(item);
         }
 
-        public PurchaseOrder Update(PurchaseOrder item)
-        {
-            return PurchaseOrders.Update(item);
+        public Task<PurchaseOrder> UpdateAsync(PurchaseOrder item) {
+            return PurchaseOrders.UpdateAsync(item);
         }
 
         #endregion
 
         #region Receipts
 
-        public IEnumerable<Receipt> Create(IEnumerable<Receipt> items)
-        {
-            return Receipts.Create(items);
+        public Task<IEnumerable<Receipt>> CreateAsync(IEnumerable<Receipt> items) {
+            return Receipts.CreateAsync(items);
         }
 
-        public IEnumerable<Receipt> Update(IEnumerable<Receipt> items)
-        {
-            return Receipts.Update(items);
+        public Task<IEnumerable<Receipt>> UpdateAsync(IEnumerable<Receipt> items) {
+            return Receipts.UpdateAsync(items);
         }
 
-        public Receipt Create(Receipt item)
-        {
-            return Receipts.Create(item);
+        public Task<Receipt> CreateAsync(Receipt item) {
+            return Receipts.CreateAsync(item);
         }
 
-        public Receipt Update(Receipt item)
-        {
-            return Receipts.Update(item);
-        }
-
-        #endregion
-
-        #region Setups
-
-        public ImportSummary Create(Setup item)
-        {
-            return Setup.Create(item);
-        }
-
-        public ImportSummary Update(Setup item)
-        {
-            return Setup.Update(item);
+        public Task<Receipt> UpdateAsync(Receipt item) {
+            return Receipts.UpdateAsync(item);
         }
 
         #endregion
 
         #region TaxRates
 
-        public IEnumerable<TaxRate> Create(IEnumerable<TaxRate> items)
-        {
-            return TaxRates.Create(items);
+        public Task<IEnumerable<TaxRate>> CreateAsync(IEnumerable<TaxRate> items) {
+            return TaxRates.CreateAsync(items);
         }
 
-        public IEnumerable<TaxRate> Update(IEnumerable<TaxRate> items)
-        {
-            return TaxRates.Update(items);
+        public Task<IEnumerable<TaxRate>> UpdateAsync(IEnumerable<TaxRate> items) {
+            return TaxRates.UpdateAsync(items);
         }
 
-        public TaxRate Create(TaxRate item)
-        {
-            return TaxRates.Create(item);
+        public Task<TaxRate> CreateAsync(TaxRate item) {
+            return TaxRates.CreateAsync(item);
         }
 
-        public TaxRate Update(TaxRate item)
-        {
-            return TaxRates.Update(item);
+        public Task<TaxRate> UpdateAsync(TaxRate item) {
+            return TaxRates.UpdateAsync(item);
         }
 
         #endregion
 
-        #region TrackingCategories
-
-        public IEnumerable<TrackingCategory> Create(IEnumerable<TrackingCategory> items)
-        {
-            return TrackingCategories.Create(items);
-        }
-
-        public IEnumerable<TrackingCategory> Update(IEnumerable<TrackingCategory> items)
-        {
-            return TrackingCategories.Update(items);
-        }
-
-        public TrackingCategory Create(TrackingCategory item)
-        {
-            return TrackingCategories.Create(item);
-        }
-
-        public TrackingCategory Update(TrackingCategory item)
-        {
-            return TrackingCategories.Update(item);
-        }
-
-        #endregion
-
-        public void SummarizeErrors(bool summarize)
-        {
+        public void SummarizeErrors(bool summarize) {
             Accounts.SummarizeErrors(summarize);
             BankTransactions.SummarizeErrors(summarize);
             BankTransfers.SummarizeErrors(summarize);
             Contacts.SummarizeErrors(summarize);
-            ContactGroups.SummarizeErrors(summarize);
             CreditNotes.SummarizeErrors(summarize);
             Employees.SummarizeErrors(summarize);
             Employees.SummarizeErrors(summarize);
-            Files.SummarizeErrors(summarize);
-            Folders.SummarizeErrors(summarize);
-            Inbox.SummarizeErrors(summarize);
             Invoices.SummarizeErrors(summarize);
-            Items.SummarizeErrors(summarize);
-            LinkedTransactions.SummarizeErrors(summarize);
             ManualJournals.SummarizeErrors(summarize);
             Payments.SummarizeErrors(summarize);
             PurchaseOrders.SummarizeErrors(summarize);
             Receipts.SummarizeErrors(summarize);
             TaxRates.SummarizeErrors(summarize);
-            TrackingCategories.SummarizeErrors(summarize);
         }
     }
 }

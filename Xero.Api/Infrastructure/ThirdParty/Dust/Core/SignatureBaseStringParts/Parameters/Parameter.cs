@@ -1,34 +1,30 @@
-﻿namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Parameters
-{
-    internal struct Parameter
-    {
+﻿using System.Net;
+using Xero.Api.Infrastructure.ThirdParty.Dust.Http;
+
+namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Parameters {
+    internal struct Parameter {
         private readonly string _name;
         private readonly string _value;
 
-        internal Parameter(string name, string value)
-        {
+        internal Parameter(string name, string value) {
             _name = name;
             _value = value;
         }
 
-        internal string Name
-        {
+        internal string Name {
             get { return _name; }
         }
 
-        internal string Value
-        {
+        internal string Value {
             get { return _value; }
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             return string.Format("{0}={1}", Escape(Name), Escape(Value));
         }
 
-        private string Escape(string what)
-        {
-            return new ParameterEncoding().Escape(what);
+        private string Escape(string what) {
+            return UrlEncoder.UrlEncode(what ?? string.Empty);
         }
     }
 }

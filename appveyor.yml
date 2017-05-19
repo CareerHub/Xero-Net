@@ -1,0 +1,27 @@
+os: Visual Studio 2017
+
+version: 1.0.0-{build}
+
+configuration: Release
+
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: "{version}"
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+
+build_script:
+  - ps: dotnet restore "Xero.Api"
+  - ps: dotnet pack "Xero.Api" --configuration Release --output "bin" --version-suffix {build}
+
+artifacts:
+  - path: Xero.Api\bin\Xero.Api.*.nupkg
+
+deploy:
+  provider: NuGet
+  api_key:
+    secure: +AIEY0E9rURDXqzW7YM/RoRXDhOxdTZQ4XyUxNCKR6zaHvj7ha/uZHnhqofdaUu3
+  skip_symbols: false
+  on:
+   appveyor_repo_tag: true

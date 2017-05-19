@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net;
 using Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Parameters;
+using Xero.Api.Infrastructure.ThirdParty.Dust.Http;
 
 namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.Earl {
 	internal class EarlPart {
@@ -20,7 +22,7 @@ namespace Xero.Api.Infrastructure.ThirdParty.Dust.Core.SignatureBaseStringParts.
 		}
 
 		private string Escape(string what) {
-			return new ParameterEncoding().Escape(what);
+			return UrlEncoder.UrlEncode(what ?? string.Empty);
 		}
 
 		private string Authority {
