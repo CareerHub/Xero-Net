@@ -15,10 +15,10 @@ before_build:
   - dotnet restore "Xero.Api"
 
 build_script:
-  - dotnet pack "Xero.Api" --configuration Release --output "bin" --version-suffix {build}
+  - ps: dotnet pack "Xero.Api" --configuration Release --output "bin" --version-suffix $env:APPVEYOR_BUILD_NUMBER
 
 artifacts:
-  - path: Xero.Api\bin\Xero.Api.*.nupkg
+  - path: Xero.Api\bin\*.nupkg
 
 deploy:
   provider: NuGet
