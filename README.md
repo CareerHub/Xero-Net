@@ -2,7 +2,7 @@
 ========
 ![Build Status](https://ci.appveyor.com/api/projects/status/github/visualeyes/xero-netstandard?branch=master&svg=true) 
 [![Nuget Version](https://img.shields.io/nuget/v/Xero-NetStandard.svg)](https://www.nuget.org/packages/Xero-NetStandard/)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
 A skinny wrapper of the Xero API. All third party libraries are included as source code.
 
