@@ -112,4 +112,4 @@ You can provide your own implementation to suit the database you are using for y
 All communication with the [Xero API](http://deverloper.xero.com) is compressed at source. Writing to the API is done with XML. The data model classes have be attributed to give a small XML payload. All communication back from the API is JSON. These details are transparent to the user of the class library.
 
 ## License
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+[The MIT License (MIT)](LICENSE)
